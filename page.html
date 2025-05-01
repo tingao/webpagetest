@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interview & Form Completion</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            line-height: 1.6;
+            margin: 20px;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            background: #fff;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            border-radius: 8px;
+        }
+        h1, h2 {
+            color: #0056b3;
+        }
+        iframe {
+            width: 100%;
+            height: 600px; /* Adjust height as needed */
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+        .status {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .status.pending {
+            background-color: #ffc107; /* Yellow */
+            color: #333;
+        }
+        .status.completed {
+            background-color: #28a745; /* Green */
+            color: white;
+        }
+        #formCompletedButton {
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
+            font-size: 1em;
+            cursor: pointer;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+        #formCompletedButton:hover {
+            background-color: #0056b3;
+        }
+        #finalMessage {
+            text-align: center;
+            font-size: 1.5em;
+            color: #28a745;
+            display: none; /* Hidden by default */
+            padding: 30px;
+            border: 2px dashed #28a745;
+            border-radius: 8px;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Welcome! Please complete the steps below.</h1>
+
+        <div id="hireflixSection">
+            <h2>Step 1: Complete the Video Interview</h2>
+            <p>Please interact with the Hireflix frame below to record your interview.</p>
+            <iframe id="hireflixIframe" src="https://app.hireflix.com/public-application/67f55d95e8fbeb89049ab720" allow="camera; microphone" allowfullscreen></iframe>
+            <div id="hireflixStatus" class="status pending">Hireflix Status: Pending</div>
+        </div>
+
+        <div id="formSection">
+            <h2>Step 2: Fill out the Google Form</h2>
+            <p>Please fill out and submit the form below.</p>
+            <iframe id="googleFormIframe" src="https://docs.google.com/forms/d/e/1FAIpQLSd1rVQkIjd5ppA1sPT3tLpyWjgPKtMzU72SGZmfLOjHtlzncQ/viewform?embedded=true"></iframe>
+            <div id="formStatus" class="status pending">Form Status: Pending (Please click "I Finished the Form" after submitting)</div>
+            <button id="formCompletedButton">I Finished the Form</button>
+        </div>
+
+        <div id="finalMessage" class="hidden">
+            <p>Thank you! You have completed both the interview and the form.</p>
+            <p>You can now close this page or you will be redirected shortly.</p>
+            </div>
+
+    </div>
+
+    <script>
+        let hireflixCompleted = false;
+        let formCompleted = false;
+
+        const hireflixStatusDiv = document.getElementById('hireflixStatus');
+        const formStatusDiv = document.getElementById('formStatus');
+        const formCompletedButton = document.getElementById('formCompletedButton');
+        const hireflixSection = document.getElementById('hireflixSection');
+        const formSection = document.getElementById('formSection');
+        const finalMessageDiv = document.getElementById('finalMessage');
+
+        // Function to check if both steps are complete
+        function checkCompletion() {
+            if (hireflixCompleted && formCompleted) {
+                console.log("Both steps completed!");
+
+                // Update status messages
+                hireflixStatusDiv.textContent = 'Hireflix Status: Completed';
+                hireflixStatusDiv.className = 'status completed';
+                formStatusDiv.textContent = 'Form Status: Completed';
+                formStatusDiv.className = 'status completed';
+
+                // Hide the original sections
+                hireflixSection.classList.add('hidden');
+                formSection.classList.add('hidden');
+
+                // Show the final message
+                finalMessageDiv.classList.remove('hidden');
+                finalMessageDiv.style.display = 'block'; // Ensure it's displayed
+
+                // --- Choose ONE action below when both are done ---
+
+                // Option 1: Stay on the page and show the final message (already done above)
+
+                // Option 2: Redirect to another page
+                /*
+                setTimeout(() => {
+                    window.location.href = 'YOUR_THANK_YOU_PAGE_URL'; // Replace with your desired URL
+                }, 3000); // Redirect after 3 seconds
+                */
+
+                // ----------------------------------------------------
+            } else {
+                // Update status messages if only one is complete (optional, but good feedback)
+                if (hireflixCompleted) {
+                    hireflixStatusDiv.textContent = 'Hireflix Status: Completed';
+                    hireflixStatusDiv.className = 'status completed';
+                }
+                if (formCompleted) {
+                     formStatusDiv.textContent = 'Form Status: Marked as Complete';
+                     formStatusDiv.className = 'status completed';
+                }
+            }
+        }
+
+        // Listen for messages from the Hireflix iframe
+        window.addEventListener('message', (event) => {
+            // It's good practice to check the origin for security if possible.
+            // For Hireflix, the origin might be something like 'https://app.hireflix.com'.
+            // You might need to verify the exact origin from their documentation or developer console.
+            // If you have multiple iframes, origin checking is important.
+            // For this simple case with two specific iframes, checking the event data might suffice,
+            // but be aware of potential (though unlikely in this specific setup) conflicts.
+
+            // Example rudimentary check for Hireflix message based on data structure
+            if (event.data && typeof event.data === 'object' && event.data.event === 'Hireflix.InterviewCompleted') {
+                console.log("Hireflix interview completed message received!");
+                 // Optional: Further check origin: if (event.origin === 'https://app.hireflix.com') { ... }
+                if (!hireflixCompleted) { // Prevent multiple triggers
+                     hireflixCompleted = true;
+                     checkCompletion();
+                }
+            }
+             // Add checks for other specific iframe messages if needed later
+        });
+
+        // Listen for the manual button click for the Google Form
+        formCompletedButton.addEventListener('click', () => {
+            console.log("Form completed button clicked!");
+            // We assume the user clicked this AFTER submitting the form within the iframe
+            if (!formCompleted) { // Prevent multiple triggers
+                formCompleted = true;
+                checkCompletion();
+            }
+        });
+
+        // Initial status update (optional, but good practice)
+        console.log("Page loaded. Waiting for completion events.");
+
+    </script>
+
+</body>
+</html>
